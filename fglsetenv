@@ -1,0 +1,46 @@
+#!/bin/sh
+#set -x
+
+MY_NEW_FGL_ROOT=`pwd`
+for e in `env |egrep "\<(FGL|MY)"`;do
+    unset e;
+done
+unset INFORMIXC
+
+if [[ -x "$MY_NEW_FGL_ROOT/bin/fglrun" ]]; then
+  export FGLDIR=$MY_NEW_FGL_ROOT
+  echo "FGLDIR=$FGLDIR"
+  _ASDIR=`echo "$FGLDIR" | sed -e "s/^\\(.*\\)\\/$_BASE\\(.*\\)$/\\1\\/gas\\2/"`
+  if [[ -d "$_ASDIR" ]] && [[ -x "$_ASDIR/bin/httpdispatch" ]]; then
+    FGLASDIR="$_ASDIR"
+    export FGLASDIR
+    echo "FGLASDIR=$FGLASDIR"
+  fi
+  _BASENAME=`basename $MY_NEW_FGL_ROOT`
+  #for example if pwd basename is "fglgws2.50" _BASE is "fglgws"
+  _BASE=`echo $_BASENAME|sed -e 's/^\([^0-9]*\)[0-9].*$/\1/'`
+
+  REPLACE_PAT="s/[^:]*\\/$_BASE[^:abcdefghijklmnopqrstuvwxyz\\/]*\\/[^:]*://g"
+  #remove other versions with the same _BASE from the PATH and (DY)LD_LIBRARY_PATH
+  export PATH="$FGLDIR"/bin:`echo $PATH|sed -e $REPLACE_PAT`
+  if [ `uname` == "Darwin" ]; then
+    export DYLD_LIBRARY_PATH="$FGLDIR"/lib:`echo $DYLD_LIBRARY_PATH|sed -e $REPLACE_PAT`
+  else
+    export LD_LIBRARY_PATH="$FGLDIR"/lib:`echo $LD_LIBRARY_PATH|sed -e $REPLACE_PATH`
+  fi
+  fglrun -V
+  if [ -x "$FGLDIR/bin/fglWrt" ]; then
+    #call a script called myfglrelicense.sh
+    myfglrelicense.sh "$FGLDIR/bin/fglWrt"
+    #small check if we can *actually* compile 
+    _TMPDIR=`mktemp -d`
+    pushd "$_TMPDIR" >/dev/null
+    echo 'MAIN DISPLAY "fgl_getversion:",fgl_getversion() END MAIN' > main.4gl
+    fglcomp -M main
+    fglrun main
+    popd >/dev/null
+    rm -rf $_TMPDIR
+  fi
+else
+  echo "'$MY_NEW_FGL_ROOT/bin/fglrun' is not executable or does not exist"
+fi
