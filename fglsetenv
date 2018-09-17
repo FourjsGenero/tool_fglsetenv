@@ -10,15 +10,15 @@ unset INFORMIXC
 if [[ -x "$MY_NEW_FGL_ROOT/bin/fglrun" ]]; then
   export FGLDIR=$MY_NEW_FGL_ROOT
   echo "FGLDIR=$FGLDIR"
+  _BASENAME=`basename $MY_NEW_FGL_ROOT`
+  #for example if pwd basename is "fglgws2.50" _BASE is "fglgws"
+  _BASE=`echo $_BASENAME|sed -e 's/^\([^0-9]*\)[0-9].*$/\1/'`
   _ASDIR=`echo "$FGLDIR" | sed -e "s/^\\(.*\\)\\/$_BASE\\(.*\\)$/\\1\\/gas\\2/"`
   if [[ -d "$_ASDIR" ]] && [[ -x "$_ASDIR/bin/httpdispatch" ]]; then
     FGLASDIR="$_ASDIR"
     export FGLASDIR
     echo "FGLASDIR=$FGLASDIR"
   fi
-  _BASENAME=`basename $MY_NEW_FGL_ROOT`
-  #for example if pwd basename is "fglgws2.50" _BASE is "fglgws"
-  _BASE=`echo $_BASENAME|sed -e 's/^\([^0-9]*\)[0-9].*$/\1/'`
 
   REPLACE_PAT="s/[^:]*\\/$_BASE[^:abcdefghijklmnopqrstuvwxyz\\/]*\\/[^:]*://g"
   #remove other versions with the same _BASE from the PATH and (DY)LD_LIBRARY_PATH
@@ -32,14 +32,30 @@ if [[ -x "$MY_NEW_FGL_ROOT/bin/fglrun" ]]; then
   if [ -x "$FGLDIR/bin/fglWrt" ]; then
     #call a script called myfglrelicense.sh
     myfglrelicense.sh "$FGLDIR/bin/fglWrt"
-    #small check if we can *actually* compile 
-    _TMPDIR=`mktemp -d`
-    pushd "$_TMPDIR" >/dev/null
-    echo 'MAIN DISPLAY "fgl_getversion:",fgl_getversion() END MAIN' > main.4gl
-    fglcomp -M main
-    fglrun main
-    popd >/dev/null
-    rm -rf $_TMPDIR
+  fi
+  #small check if we can *actually* compile 
+  _TMPDIR=`mktemp -d`
+  pushd "$_TMPDIR" >/dev/null
+  echo 'MAIN DISPLAY "fgl_getversion:",fgl_getversion() END MAIN' > main.4gl
+  fglcomp -M main
+  fglrun main
+  _FGLRESULT=$?
+  popd >/dev/null
+  rm -rf $_TMPDIR
+  if [ $_FGLRESULT -eq 0 ]; then
+    #copy vim files for FGL<3.10, for >=3.10 use in ~/.vimrc
+    #let generofiles=expand($FGLDIR . "/vimfiles")
+    #if isdirectory(generofiles)
+    #  let &rtp=generofiles.','.&rtp
+    #endif
+    if [ -f "$FGLDIR/lib/fgl.vim" ]; then
+      mkdir -p ~/.vim/syntax
+      #filter out the "auto upper case" code
+      cat "$FGLDIR/lib/fgl.vim" | sed -e 's/^inoreabbr/"inoreabbr/' > ~/.vim/syntax/fgl.vim
+      cat "$FGLDIR/lib/per.vim" | sed -e 's/^inoreabbr/"inoreabbr/' > ~/.vim/syntax/per.vim
+      mkdir -p ~/.vim/autoload
+      cp "$FGLDIR/lib/fglcomplete.vim" ~/.vim/autoload/
+    fi
   fi
 else
   echo "'$MY_NEW_FGL_ROOT/bin/fglrun' is not executable or does not exist"
