@@ -26,7 +26,7 @@ if [[ -x "$MY_NEW_FGL_ROOT/bin/fglrun" ]]; then
   if [ `uname` == "Darwin" ]; then
     export DYLD_LIBRARY_PATH="$FGLDIR"/lib:`echo $DYLD_LIBRARY_PATH|sed -e $REPLACE_PAT`
   else
-    export LD_LIBRARY_PATH="$FGLDIR"/lib:`echo $LD_LIBRARY_PATH|sed -e $REPLACE_PATH`
+    export LD_LIBRARY_PATH="$FGLDIR"/lib:`echo $LD_LIBRARY_PATH|sed -e $REPLACE_PAT`
   fi
   fglrun -V
   if [ -x "$FGLDIR/bin/fglWrt" ]; then
