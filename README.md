@@ -48,3 +48,9 @@ $FGLWRT -m M9878678678
 fglsetenvGDC is thought to be used with a GDC as a 'door opener' for running Genero tools via the automatic SSH tunnel when running remotely.
 Typical environment: GDC used from Windows or Mac and ssh login to the dev machine.
 It exports the port forwarding environment and other tool related environment variables to the developer side where GDC is running.
+
+In GDC the shortcut command must be something like this
+```
+@FGL;FGLUSER=@USER;export FGLUSER;FGLCOMPUTER="yourdevserver";export FGLCOMPUTER;cd ~/fgl310;. ./envcomp;cd ~/w/github/fglsetenv;./fglsetenvGDC;exit
+```
+
