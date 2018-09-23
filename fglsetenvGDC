@@ -1,0 +1,23 @@
+#!/bin/bash
+realpath() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
+SCRIPT_NAME=`realpath $0`
+FGLSETENVDIR=`dirname $SCRIPT_NAME` 
+pushd $FGLSETENVDIR >/dev/null
+#we recompile everything always: hence avoid version clashes
+fglcomp -M fglsetenvGDC
+if [ $? -ne 0 ]; then
+  echo "Can't compile fglsetenvGDC"
+  exit 1
+fi
+fglform -M fglsetenvGDC
+if [ $? -ne 0 ]; then
+  echo "Can't form compile fglsetenvGDC"
+  exit 1
+fi
+export FGLSETENVDIR
+export DBPATH=$FGLSETENVDIR
+popd > /dev/null
+exec fglrun $FGLSETENVDIR/fglsetenvGDC.42m "$@" 

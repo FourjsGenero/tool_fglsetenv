@@ -3,7 +3,20 @@
 
 MY_NEW_FGL_ROOT=`pwd`
 for e in `env |egrep "\<(FGL|MY)"`;do
-    unset e;
+    case "$e" in
+      FGLSERVER=*)
+      ;;
+      _FGLFEID=*)
+      ;;
+      FGLUSER=*)
+      ;;
+      FGLCOMPUTER=*)
+      ;;
+      *)
+      #echo "unset $e"
+      unset e
+      ;;
+    esac
 done
 unset INFORMIXC
 

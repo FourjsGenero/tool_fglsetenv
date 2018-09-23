@@ -42,3 +42,9 @@ fi
 $FGLWRT -L "TAB#XXXXXX" "1234FGKLDD"
 $FGLWRT -m M9878678678
 ```
+
+## fglsetenvGDC
+
+fglsetenvGDC is thought to be used with a GDC as a 'door opener' for running Genero tools via the automatic SSH tunnel when running remotely.
+Typical environment: GDC used from Windows or Mac and ssh login to the dev machine.
+It exports the port forwarding environment and other tool related environment variables to the developer side where GDC is running.
