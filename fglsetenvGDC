@@ -1,9 +1,15 @@
 #!/bin/bash
-realpath() {
-    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+fullname () {
+  local myDIR=`dirname "$1"`
+  local prev=`pwd`
+  cd "$myDIR" >/dev/null
+  realDIR=`pwd`
+  cd "$prev" > /dev/null
+  local basefile=`basename "$1"`
+  echo "$realDIR/$basefile"
 }
 
-SCRIPT_NAME=`realpath $0`
+SCRIPT_NAME=`fullname $0`
 FGLSETENVDIR=`dirname $SCRIPT_NAME` 
 pushd $FGLSETENVDIR >/dev/null
 #we recompile everything always: hence avoid version clashes
